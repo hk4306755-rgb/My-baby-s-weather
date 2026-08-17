@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101522">
+<title>A Little Forecast For You</title>
+<style>
+:root{--bg:#0d111c;--card:rgba(255,255,255,.09);--line:rgba(255,255,255,.14);--text:#f7f4ee;--muted:#b7b5bc;--accent:#f2b8c6;--accent2:#c7d8ff}
+*{box-sizing:border-box} body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 20% 10%,#24324d 0,#121827 35%,#090c14 100%);color:var(--text);display:flex;justify-content:center;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 80% 25%,rgba(242,184,198,.13),transparent 28%),radial-gradient(circle at 20% 80%,rgba(199,216,255,.1),transparent 30%);pointer-events:none}
+.app{width:min(720px,100%);padding:28px 18px 44px;position:relative}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}.eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}.heart{font-size:20px;color:var(--accent)}
+h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(34px,8vw,62px);line-height:.98;margin:0 0 12px;letter-spacing:-.035em}.sub{color:var(--muted);font-size:15px;line-height:1.6;margin:0 0 26px}
+.card{background:var(--card);border:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:28px;padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.28)}
+.weather-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.place{font-size:13px;color:var(--muted);margin-bottom:5px}.condition{font-size:18px}.temp{font-size:72px;line-height:.9;font-weight:500;letter-spacing:-.06em;margin-top:14px}.unit{font-size:28px;color:var(--muted);vertical-align:top;margin-left:3px}.weather-icon{font-size:62px;line-height:1}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:26px}.meta div{padding:13px 12px;border:1px solid var(--line);border-radius:17px}.label{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}.value{font-size:14px}
+.message{margin-top:16px;padding:22px 20px;border-radius:22px;background:linear-gradient(135deg,rgba(242,184,198,.12),rgba(199,216,255,.08));border:1px solid rgba(242,184,198,.18)}.message .tag{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}.message p{font-family:Georgia,serif;font-size:21px;line-height:1.4;margin:0}
+button{width:100%;margin-top:16px;border:0;border-radius:18px;padding:15px 18px;background:#f7f4ee;color:#141722;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}button:hover{transform:translateY(-1px)}button:active{transform:translateY(1px)}
+.footer{text-align:center;color:#858693;font-size:11px;line-height:1.6;margin-top:22px}.error{color:#ffccd5;font-size:13px;margin-top:14px;display:none}
+@media(max-width:480px){.app{padding:22px 14px 36px}.card{padding:20px;border-radius:24px}.temp{font-size:62px}.weather-icon{font-size:50px}.meta{grid-template-columns:1fr 1fr}.meta div:last-child{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="top"><div class="eyebrow">A little forecast · just for you</div><div class="heart">♡</div></div>
+  <h1>What's the sky<br>doing, baby?</h1>
+  <p class="sub">A tiny weather corner made for you — because apparently I needed another excuse to check the weather for you. ❤️</p>
+
+  <section class="card">
+    <div class="weather-head">
+      <div>
+        <div class="place" id="place">Loading your sky…</div>
+        <div class="condition" id="condition">Checking the forecast</div>
+        <div class="temp" id="temp">—<span class="unit">°C</span></div>
+      </div>
+      <div class="weather-icon" id="icon">☁️</div>
+    </div>
+    <div class="meta">
+      <div><span class="label">Feels like</span><span class="value" id="feels">—</span></div>
+      <div><span class="label">Rain chance</span><span class="value" id="rain">—</span></div>
+      <div><span class="label">Wind</span><span class="value" id="wind">—</span></div>
+    </div>
+    <div class="message"><div class="tag">Today's tiny message</div><p id="message">Loading something cheesy…</p></div>
+    <button id="refresh">Refresh the sky ✦</button>
+    <div class="error" id="error"></div>
+  </section>
+  <div class="footer">Weather data refreshes automatically. The flirting is completely intentional.</div>
+</main>
+<script>
+/*
+  CHANGE THESE TWO VALUES to your girlfriend's location.
+  Example: Dehradun = 30.3165, 78.0322
+*/
+const LAT = 30.3165;
+const LON = 78.0322;
+const CITY_NAME = "Your city";
+
+const messages = [
+ "The forecast says warm. I checked twice. Still not warmer than you. ❤️",
+ "Cloudy outside, but somehow you're still the brightest thing on my screen.",
+ "There may be rain today. Perfect excuse for me to miss you dramatically. 🌧️",
+ "Today's forecast: 100% chance of me wanting to talk to you.",
+ "The sky can change every hour. My favourite person remains the same.",
+ "If the weather gets boring, text me. I come with better forecasts. 😌",
+ "Apparently it's a beautiful day. The weather app is finally catching up to me.",
+ "Today's temperature is irrelevant. You already make things warmer. ❤️",
+ "Forecast update: still obsessed. Unfortunately, no cure has been found.",
+ "Whatever the weather says, don't forget someone is ridiculously fond of you.",
+ "Chance of rain: maybe. Chance of me flirting with you: guaranteed.",
+ "The clouds have competition today. You're still winning.",
+ "If I could control the weather, I'd give you perfect skies and a hug. 🌤️",
+ "Weather report: look cute, stay hydrated, and think about me occasionally. 😏",
+ "Today's little reminder: you're someone's favourite notification."
+];
+
+const conditions = {
+  0:["Clear sky","☀️"],1:["Mainly clear","🌤️"],2:["Partly cloudy","⛅"],3:["Overcast","☁️"],
+  45:["Foggy","🌫️"],48:["Foggy","🌫️"],51:["Light drizzle","🌦️"],53:["Drizzle","🌦️"],55:["Drizzle","🌧️"],
+  56:["Freezing drizzle","🌧️"],57:["Freezing drizzle","🌧️"],61:["Light rain","🌦️"],63:["Rain","🌧️"],65:["Heavy rain","🌧️"],
+  66:["Freezing rain","🌧️"],67:["Freezing rain","🌧️"],71:["Light snow","🌨️"],73:["Snow","❄️"],75:["Heavy snow","❄️"],
+  77:["Snow grains","❄️"],80:["Rain showers","🌦️"],81:["Rain showers","🌧️"],82:["Heavy showers","⛈️"],
+  85:["Snow showers","🌨️"],86:["Heavy snow showers","❄️"],95:["Thunderstorm","⛈️"],96:["Thunderstorm","⛈️"],99:["Thunderstorm","⛈️"]
+};
+
+const $ = id => document.getElementById(id);
+function pickMessage(){
+  const key = "gfWeatherMessage";
+  let last = Number(localStorage.getItem(key));
+  let n = Math.floor(Math.random()*messages.length);
+  if(messages.length>1 && n===last) n=(n+1)%messages.length;
+  localStorage.setItem(key,n); $("message").textContent=messages[n];
+}
+function setError(text){$("error").textContent=text;$("error").style.display="block";}
+async function loadWeather(){
+  $("error").style.display="none";
+  $("place").textContent=CITY_NAME;
+  $("condition").textContent="Checking the forecast…";
+  try{
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&hourly=precipitation_probability&forecast_days=1&timezone=auto`;
+    const r=await fetch(url); if(!r.ok) throw new Error("Weather request failed");
+    const d=await r.json(), c=d.current;
+    const [label,emoji]=conditions[c.weather_code]||["Current conditions","🌤️"];
+    $("condition").textContent=label; $("icon").textContent=emoji;
+    $("temp").innerHTML=`${Math.round(c.temperature_2m)}<span class="unit">°C</span>`;
+    $("feels").textContent=`${Math.round(c.apparent_temperature)}°C`;
+    const idx=new Date().getHours();
+    const probs=d.hourly?.precipitation_probability||[];
+    $("rain").textContent=(probs[idx] ?? "—")+"%";
+    $("wind").textContent=Math.round(c.wind_speed_10m)+" km/h";
+    pickMessage();
+  }catch(e){
+    setError("Couldn't fetch the live weather right now. The cute messages still work. ❤️");
+    pickMessage();
+  }
+}
+$("refresh").addEventListener("click",loadWeather);
+loadWeather();
+setInterval(loadWeather,15*60*1000);
+</script>
+</body>
+</html>
